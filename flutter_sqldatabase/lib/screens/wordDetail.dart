@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_sqldatabase/db/dbHelper.dart';
 import '../models/word.dart';
 
 class WordDetail extends StatefulWidget {
@@ -11,7 +12,8 @@ class WordDetail extends StatefulWidget {
   State<StatefulWidget> createState() => WordDetailState(word);
 }
 
-enum Choise{Delete,Update}
+DbHelper dbHelper = DbHelper();
+enum Choise { Delete, Update }
 
 class WordDetailState extends State {
   Word word;
@@ -19,29 +21,26 @@ class WordDetailState extends State {
   @override
   Widget build(BuildContext context) {
     final List<String> entries = [word.english, word.turkish, 'Örnek Cümle'];
-    final  List<Color> colorCodes = [Colors.green, Colors.lime, Colors.lightBlue];
+    final List<Color> colorCodes = [
+      Colors.green,
+      Colors.lime,
+      Colors.lightBlue
+    ];
     return Scaffold(
         appBar: AppBar(
           title: Text("Kelime Detayları"),
           actions: <Widget>[
             PopupMenuButton<Choise>(
-              onSelected: (Choise choise){
-                AlertDialog alert = AlertDialog(
-                  title: Text("Seçim"),
-                  content: Text(choise.toString()),
-                );
-                showDialog(context: context,builder: (_)=>alert);
-              },
-              itemBuilder: (BuildContext context)=><PopupMenuEntry<Choise>>[
+              onSelected: select,
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<Choise>>[
                 PopupMenuItem<Choise>(
                   value: Choise.Delete,
                   child: Text("Delete Word"),
                 ),
-                 PopupMenuItem<Choise>(
+                PopupMenuItem<Choise>(
                   value: Choise.Update,
                   child: Text("Update Word"),
                 )
-
               ],
             )
           ],
@@ -53,13 +52,29 @@ class WordDetailState extends State {
             return Container(
               height: 50,
               color: colorCodes[index],
-              
-              child: Center(child: Text('${entries[index]}')),              
+              child: Center(child: Text('${entries[index]}')),
             );
           },
           separatorBuilder: (BuildContext context, int index) =>
               const Divider(),
-        )
-        );
+        ));
+  }
+
+  void select(Choise choise) async {
+    int result;
+    switch (choise) {
+      case Choise.Delete:
+        Navigator.pop(context, true);
+        result = await dbHelper.delete(word.id);
+        if (result != 0) {
+          AlertDialog alert = AlertDialog(
+            title: Text("Success"),
+            content: Text("Word Deleted"),
+          );
+          showDialog(context: context, builder: (_) => alert);
+        }
+        break;
+      default:
+    }
   }
 }

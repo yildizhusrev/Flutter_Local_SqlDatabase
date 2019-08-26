@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_sqldatabase/db/dbHelper.dart';
 import 'package:flutter_sqldatabase/models/word.dart';
+import 'package:flutter_sqldatabase/screens/wordAdd.dart';
 import 'package:flutter_sqldatabase/screens/wordDetail.dart';
 
 class WordList extends StatefulWidget {
@@ -25,6 +26,13 @@ class WordListState extends State {
 
     return Scaffold(
       body: wordListItems(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          gotoAdd();
+        },
+        tooltip: "add new word",
+        child: Icon(Icons.add),
+      ),
     );
   }
 
@@ -54,6 +62,14 @@ class WordListState extends State {
 
   void getData() {
     var db = dbHelper.initializeDb();
+    /*
+    db.then((r){
+      for (var i = 0; i < 5; i++) {
+         Word w = Word("Araba"+i.toString(), "Car"+i.toString());
+         dbHelper.insert(w);
+      }
+    });
+    */
     db.then((result) {
       var wordFuture = dbHelper.getWord();
       wordFuture.then((data) {
@@ -71,7 +87,18 @@ class WordListState extends State {
   }
 
   void gotoDetail(Word word) async {
-    await Navigator.push(
+    bool result = await Navigator.push(
         context, MaterialPageRoute(builder: (context) => WordDetail(word)));
+    if (result != null && result) {
+      getData();
+    }
+  }
+
+  void gotoAdd() async {
+    bool result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => WordAdd()));
+    if (result != null && result) {
+      getData();
+    }
   }
 }
